@@ -1,0 +1,51 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y \
+            meson ninja-build gcc pkgconf-pkg-config git \
+            gtk4-devel gnome-desktop4-devel gsettings-desktop-schemas-devel \
+            gobject-introspection-devel gi-docgen
+
+      - uses: actions/checkout@v7
+
+      - name: Build documentation
+        run: |
+          meson setup builddir -Dintrospection=enabled -Ddocumentation=true
+          meson compile -C builddir
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: builddir/doc/unity-backgrounds
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,4 @@
+option('introspection', type: 'feature', value: 'auto',
+       description: 'Generate GObject Introspection data')
+option('documentation', type: 'boolean', value: false,
+       description: 'Build the API reference with gi-docgen')

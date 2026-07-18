@@ -26,6 +26,26 @@ enum
 
 static guint signals[N_SIGNALS];
 
+/**
+ * UnityBackgroundSource:
+ *
+ * Renders the desktop wallpaper described by GSettings.
+ *
+ * A `UnityBackgroundSource` reads the `org.gnome.desktop.background` schema and
+ * follows the `org.gnome.desktop.interface` colour scheme to pick the light or
+ * dark picture, exactly as GNOME Shell does. `GnomeBG` performs the drawing —
+ * placement, gradients and slideshow blending — while the source only chooses
+ * the variant and turns the result into a [class@Gdk.Texture].
+ *
+ * The source watches the settings, the colour scheme and the wallpaper file
+ * itself (catching in-place overwrites and slideshow steps), emitting
+ * [signal@Unity.BackgroundSource::changed] whenever the effective wallpaper
+ * changes. Render it at a given pixel size with
+ * [method@Unity.BackgroundSource.render].
+ *
+ * A single source is meant to be shared: one instance can drive several
+ * [class@Unity.Background] widgets, so every monitor shows the same wallpaper.
+ */
 G_DEFINE_FINAL_TYPE (UnityBackgroundSource, unity_background_source, G_TYPE_OBJECT)
 
 static void
@@ -52,6 +72,20 @@ reload (UnityBackgroundSource *self)
     gnome_bg_set_filename (self->bg, path);
 }
 
+/**
+ * unity_background_source_render:
+ * @self: a `UnityBackgroundSource`
+ * @width: the target width, in pixels
+ * @height: the target height, in pixels
+ *
+ * Renders the current effective wallpaper at the given pixel size.
+ *
+ * The placement, colour fill and any slideshow blending are applied for the
+ * requested size. Callers that display the result should pass device pixels
+ * (logical size times the scale factor) so it stays crisp on HiDPI.
+ *
+ * Returns: (transfer full): a newly rendered [class@Gdk.Texture]
+ */
 GdkTexture *
 unity_background_source_render (UnityBackgroundSource *self, int width, int height)
 {
@@ -73,6 +107,14 @@ unity_background_source_render (UnityBackgroundSource *self, int width, int heig
   return gdk_memory_texture_new (width, height, GDK_MEMORY_R8G8B8, bytes, rowstride);
 }
 
+/**
+ * unity_background_source_has_wallpaper:
+ * @self: a `UnityBackgroundSource`
+ *
+ * Gets whether a picture is set, as opposed to a plain colour fill.
+ *
+ * Returns: %TRUE unless the placement is `G_DESKTOP_BACKGROUND_STYLE_NONE`
+ */
 gboolean
 unity_background_source_has_wallpaper (UnityBackgroundSource *self)
 {
@@ -122,6 +164,14 @@ unity_background_source_class_init (UnityBackgroundSourceClass *klass)
 
   object_class->dispose = unity_background_source_dispose;
 
+  /**
+   * UnityBackgroundSource::changed:
+   * @self: the source
+   *
+   * Emitted when the effective wallpaper changes — a settings or colour-scheme
+   * edit, an in-place file overwrite, or a slideshow step. Widgets should
+   * re-render; the greeter mirror should be re-published.
+   */
   signals[CHANGED] = g_signal_new ("changed", G_TYPE_FROM_CLASS (klass),
                                    G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL,
                                    G_TYPE_NONE, 0);
@@ -144,6 +194,13 @@ unity_background_source_init (UnityBackgroundSource *self)
   reload (self);
 }
 
+/**
+ * unity_background_source_new:
+ *
+ * Creates a new background source following the desktop wallpaper settings.
+ *
+ * Returns: (transfer full): a new `UnityBackgroundSource`
+ */
 UnityBackgroundSource *
 unity_background_source_new (void)
 {

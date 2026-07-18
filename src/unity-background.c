@@ -11,6 +11,25 @@ struct _UnityBackground
   int                    cache_height;
 };
 
+/**
+ * UnityBackground:
+ *
+ * A widget that draws the desktop wallpaper.
+ *
+ * `UnityBackground` snapshots a [class@Unity.BackgroundSource] at its own
+ * allocation and scale factor, so it renders crisp at every output's resolution
+ * and repaints automatically whenever the source changes. It is a plain
+ * [class@Gtk.Widget] with no intrinsic size — it fills whatever it is given —
+ * and can be dropped into any container or UI definition:
+ *
+ * ```xml
+ * <object class="UnityBackground"/>
+ * ```
+ *
+ * Pass a shared source to [ctor@Unity.Background.new] so several widgets show
+ * the same wallpaper; pass %NULL and the widget creates a private source of its
+ * own.
+ */
 G_DEFINE_FINAL_TYPE (UnityBackground, unity_background, GTK_TYPE_WIDGET)
 
 static void
@@ -99,6 +118,19 @@ unity_background_init (UnityBackground *self)
   (void) self;
 }
 
+/**
+ * unity_background_new:
+ * @source: (nullable) (transfer none): the source to draw, or %NULL for a
+ *   private one
+ *
+ * Creates a new background widget.
+ *
+ * When @source is %NULL the widget lazily creates and owns its own
+ * [class@Unity.BackgroundSource]; pass a shared source to have several widgets
+ * render the same wallpaper.
+ *
+ * Returns: (transfer none): a new `UnityBackground`
+ */
 GtkWidget *
 unity_background_new (UnityBackgroundSource *source)
 {

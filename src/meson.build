@@ -42,3 +42,21 @@ pkg.generate(
   subdirs: 'unity-backgrounds',
   requires: [dep_gtk, dep_gnomebg],
 )
+
+build_gir = get_option('introspection').allowed()
+unity_backgrounds_gir = []
+if build_gir
+  unity_backgrounds_gir = gnome.generate_gir(
+    unity_backgrounds_lib,
+    sources: unity_backgrounds_sources + unity_backgrounds_headers,
+    namespace: 'Unity',
+    nsversion: '0.1',
+    identifier_prefix: 'Unity',
+    symbol_prefix: 'unity',
+    export_packages: 'unity-backgrounds',
+    includes: ['GObject-2.0', 'Gtk-4.0'],
+    dependencies: unity_backgrounds_deps,
+    header: 'unity-background.h',
+    install: true,
+  )
+endif

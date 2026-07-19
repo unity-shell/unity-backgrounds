@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
+<wallpapers>
+  <wallpaper deleted="false">
+    <name>@NAME@</name>
+    <filename>@LIGHT@</filename>
+    <filename-dark>@DARK@</filename-dark>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>@PCOLOR@</pcolor>
+    <scolor>#000000</scolor>
+  </wallpaper>
+</wallpapers>

@@ -22,6 +22,7 @@ dep_gsd = dependency('gsettings-desktop-schemas')
 dep_pixbuf = dependency('gdk-pixbuf-2.0')
 
 subdir('src')
+subdir('backgrounds')
 
 if get_option('documentation')
   if not build_gir
